@@ -80,7 +80,7 @@ jobs:
           color: '#FF0000'
           avatarUrl: https://github.githubassets.com/images/modules/logos_page/Octocat.png
           description: Build failed
-          details: Commit ${{ github.event.head_commit.url }} by ${{ github.event.head_commit.committer.username }} broke the build
+          details: Commit ${{ github.event.head_commit.url }} by ${{ github.event.head_commit.author.username }} broke the build
           webhookUrl: ${{ secrets.DISCORD_WEBHOOK }}
 
   tag_release:
