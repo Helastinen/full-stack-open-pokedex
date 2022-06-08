@@ -56,7 +56,7 @@ jobs:
     steps:
       - name: Discord Webhook Notify - deployment successful
         uses: rjstone/discord-webhook-notify@v1.0.4
-        if: ${{ success() }}
+        if: ${{ (!contains(toJson(github.event.commits.*.message), '#skip')) && (github.event_name == 'push') && (success()) }}
         with:
           severity: info
           color: '#00FF00'
@@ -66,7 +66,7 @@ jobs:
           webhookUrl: ${{ secrets.DISCORD_WEBHOOK }}
       - name: Discord Webhook Notify - deployment failed
         uses: rjstone/discord-webhook-notify@v1.0.4
-        if: ${{ failure() }}
+        if: ${{ (!contains(toJson(github.event.commits.*.message), '#skip')) && (github.event_name == 'push') && (failure()) }}
         with:
           severity: error
           color: '#FF0000'
@@ -94,4 +94,3 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           With_V: true
           DEFAULT_BUMP: patch
-  
