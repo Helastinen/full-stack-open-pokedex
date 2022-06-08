@@ -59,19 +59,21 @@ jobs:
         if: ${{ success() }}
         with:
           severity: info
-          username: ${{ toJson(github.actor) }}
-          color: '#ff00aa'
+          color: '#00FF00'
           avatarUrl: https://github.githubassets.com/images/modules/logos_page/Octocat.png
           description: A new version of Pokedex deployed
-          details: to INSERT URL HERE
+          details: ${{ github.event.head_commit.message }}
           webhookUrl: ${{ secrets.DISCORD_WEBHOOK }}
       - name: Discord Webhook Notify - deployment failed
         uses: rjstone/discord-webhook-notify@v1.0.4
         if: ${{ failure() }}
         with:
           severity: error
-          details: Build failed
-          webhookUrl: ${{ secrets.DISCORD_WEBHOOK }} 
+          color: '#FF0000'
+          avatarUrl: https://github.githubassets.com/images/modules/logos_page/Octocat.png
+          description: Build failed
+          details: Commit ${{ github.event.head_commit.url }} by ${{ github.event.head_commit.committer.username }} broke the build
+          webhookUrl: ${{ secrets.DISCORD_WEBHOOK }}
   tag_release:
     needs: [simple_deployment_pipeline]
     runs-on: ubuntu-20.04
