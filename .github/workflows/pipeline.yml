@@ -13,33 +13,43 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v3
+
       - name: github context
         env:
           GITHUB_CONTEXT: ${{ toJson(github) }}
         run: echo "$GITHUB_CONTEXT"
+
       - uses: actions/setup-node@v2
         with:
           node-version: "16"
+
       - name: npm install
         run: npm install
+
       - name: lint
         run: npm run eslint
+
       - name: build
         run: npm run build
+
       - name: test
         run: npm run test
+
       - name: e2e tests
         uses: cypress-io/github-action@v2
         with:
           command: npm run test:e2e
           start: npm run start-prod
           wait-on: http://localhost:5000
+
       - name: commit messages
         env:
           COMMIT_MESSAGES: ${{ toJson(github.event.commits.*.message) }}
         run: echo "$COMMIT_MESSAGES"
+
       - name: info message
         run: echo "'deploy to Heroku' task is skipped if commit message contains '#skip'"
+
       - name: deploy to Heroku
         if: ${{ (!contains(toJson(github.event.commits.*.message), '#skip')) && (github.event_name == 'push') }}
         uses: akhileshns/heroku-deploy@v3.12.12
@@ -50,11 +60,8 @@ jobs:
           healthcheck: https://fso2022-part11-depl-exercise.herokuapp.com/health
           checkstring: ok
           rollbackonhealthcheckfailed: true
-  discord_webhook_notify:
-    needs: [simple_deployment_pipeline]
-    runs-on: ubuntu-20.04
-    steps:
-      - name: Discord Webhook Notify - deployment successful
+
+      - name: discord webhook notify - deployment successful
         uses: rjstone/discord-webhook-notify@v1.0.4
         if: ${{ (!contains(toJson(github.event.commits.*.message), '#skip')) && (github.event_name == 'push') && (success()) }}
         with:
@@ -64,7 +71,8 @@ jobs:
           description: A new version of Pokedex deployed
           details: ${{ github.event.head_commit.message }}
           webhookUrl: ${{ secrets.DISCORD_WEBHOOK }}
-      - name: Discord Webhook Notify - deployment failed
+
+      - name: discord webhook notify - deployment failed
         uses: rjstone/discord-webhook-notify@v1.0.4
         if: ${{ (!contains(toJson(github.event.commits.*.message), '#skip')) && (github.event_name == 'push') && (failure()) }}
         with:
@@ -74,6 +82,7 @@ jobs:
           description: Build failed
           details: Commit ${{ github.event.head_commit.url }} by ${{ github.event.head_commit.committer.username }} broke the build
           webhookUrl: ${{ secrets.DISCORD_WEBHOOK }}
+
   tag_release:
     needs: [simple_deployment_pipeline]
     runs-on: ubuntu-20.04
@@ -81,12 +90,15 @@ jobs:
       - uses: actions/checkout@v3
         with:
           fetch-depth: '0'
+
       - name: commit messages
         env:
           COMMIT_MESSAGES: ${{ toJson(github.event.commits.*.message) }}
         run: echo "$COMMIT_MESSAGES"
+
       - name: info message
         run: echo "'Bump version and push tag' task is skipped if commit message contains '#skip'"
+      
       - name: bump version and push tag
         if: ${{ (!contains(toJson(github.event.commits.*.message), '#skip')) && (github.event_name == 'push') }}
         uses: anothrNick/github-tag-action@1.36.0
